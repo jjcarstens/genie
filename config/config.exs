@@ -47,4 +47,7 @@ config :nerves_network, :default,
     ipv4_address_method: :dhcp
   ]
 
+config :genie, :websocket_url, System.get_env("WEBSOCKET_URL") || "ws://localhost:4000/nerves/websocket"
+config :genie, :websocket_token, System.get_env("WEBSOCKET_TOKEN") || "some_token"
+
 # import_config "#{Mix.target()}.exs"

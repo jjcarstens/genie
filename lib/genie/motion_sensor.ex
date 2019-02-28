@@ -25,21 +25,11 @@ defmodule Genie.MotionSensor do
     {:noreply, %{state | pin: motion_pin}}
   end
 
-  # @impl true
-  # def handle_info({:circuits_gpio, _pin, current, _val}, %{last_timestamp: past} = state) when is_powering_up(current, past) do
-  #   # According to the data sheet, this PIR sensor can take up to a minute to power up
-  #   # During that time, the timer can send messages frequently between HIGH and LOW
-  #   # So, lets capture them here and not do anything if the messages look to be during the startup
-  #   # See:
-  #   #   https://www.mysensors.org/dl/57c41fdd4d04abe84cd93e12/design/31227sc.pdf
-  #   Logger.info("starting up!")
-  #   {:noreply, %{state | last_timestamp: current}}
-  # end
-
   @impl true
   def handle_info({:circuits_gpio, _pin, time, 0}, state) do
     # no motion
     Genie.StorageRelay.toggle_lights(:off)
+    Genie.StorageRelay.toggle_lock(:locked)
     {:noreply, %{state | last_timestamp: time}}
   end
 
@@ -47,6 +37,7 @@ defmodule Genie.MotionSensor do
   def handle_info({:circuits_gpio, _pin, time, 1}, state) do
     # There is motion!
     Genie.StorageRelay.toggle_lights(:on)
+    Genie.StorageRelay.toggle_lock(:unlocked)
     {:noreply, %{state | last_timestamp: time}}
   end
 end

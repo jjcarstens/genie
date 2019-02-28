@@ -1,7 +1,7 @@
 defmodule Genie.MixProject do
   use Mix.Project
 
-  @all_targets [:rpi3a]
+  @all_targets [:rpi3a, :rpi3]
 
   def project do
     [
@@ -51,6 +51,7 @@ defmodule Genie.MixProject do
 
       # Dependencies for specific targets
       {:nerves_system_rpi3a, "~> 1.6", runtime: false, targets: :rpi3a},
+      {:nerves_system_rpi3, "~> 1.6", runtime: false, targets: :rpi3},
     ]
   end
 end

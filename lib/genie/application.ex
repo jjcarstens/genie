@@ -10,10 +10,16 @@ defmodule Genie.Application do
     Supervisor.start_link(children(@target), opts)
   end
 
-  # List all child processes to be supervised
-  def children(:host), do: []
+  def children(target) do
+    [
+      {Genie.Websocket, []}
+    ] ++ target_children(target)
+  end
 
-  def children(_target) do
+  # List all child processes to be supervised
+  def target_children(:host), do: []
+
+  def target_children(_target) do
     [
       {Genie.MotionSensor, []},
       {Genie.StorageRelay, []}

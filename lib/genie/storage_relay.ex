@@ -1,7 +1,11 @@
 defmodule Genie.StorageRelay do
   use GenServer
 
-  defguard valid_value(val) when val in [:on, :off, 0, 1]
+  @high_values ["on", "locked", :on, :locked, 1]
+  @low_values ["off", "unlocked", :off, :unlocked, 0]
+  @valid_values @high_values ++ @low_values
+
+  defguard valid_value(val) when val in @valid_values
 
   defstruct lock: nil, lights: nil, options: nil
 
@@ -16,6 +20,10 @@ defmodule Genie.StorageRelay do
     {:ok, state}
   end
 
+  def read_lock, do: GenServer.call(__MODULE__, :read_lock)
+
+  def read_lights, do: GenServer.call(__MODULE__, :read_lights)
+
   def toggle_lock(val) when valid_value(val) do
     GenServer.call(__MODULE__, {:toggle_lock, val})
   end
@@ -27,14 +35,28 @@ defmodule Genie.StorageRelay do
   def toggle_lights(_val), do: :bad_toggle_value
 
   @impl true
+  def handle_call(:read_lights, _from, %{lights: lights} = state) do
+    val = Circuits.GPIO.read(lights) |> val_to_atom(:lights)
+    {:reply, val, state}
+  end
+
+  @impl true
+  def handle_call(:read_lock, _from, %{lock: lock} = state) do
+    val = Circuits.GPIO.read(lock) |> val_to_atom(:lock)
+    {:reply, val, state}
+  end
+
+  @impl true
   def handle_call({:toggle_lights, val}, _from, %{lights: lights} = state) do
-    Circuits.GPIO.write(lights, transpose_val(val))
+    Circuits.GPIO.write(lights, gpio_val(val))
+    Circuits.GPIO.read(lights) |> send_update(:lights)
     {:reply, :ok, state}
   end
 
   @impl true
   def handle_call({:toggle_lock, val}, _from, %{lock: lock} = state) do
-    Circuits.GPIO.write(lock, transpose_val(val))
+    Circuits.GPIO.write(lock, gpio_val(val))
+    Circuits.GPIO.read(lock) |> send_update(:lock)
     {:reply, :ok, state}
   end
 
@@ -45,7 +67,18 @@ defmodule Genie.StorageRelay do
     {:noreply, %{state | lock: lock_pin, lights: lights_pin}}
   end
 
-  defp transpose_val(:off), do: 0
-  defp transpose_val(:on), do: 1
-  defp transpose_val(val) when val in [1,0], do: val
+  defp gpio_val(val) when val in @low_values, do: 0
+  defp gpio_val(val) when val in @high_values, do: 1
+
+  defp val_to_atom(1, :lights), do: :on
+  defp val_to_atom(0, :lights), do: :off
+  defp val_to_atom(1, :lock), do: :locked
+  defp val_to_atom(0, :lock), do: :unlocked
+
+  defp send_update(val, update) when is_number(val) do
+    val_to_atom(val, update) |> send_update(update)
+  end
+  defp send_update(val, update) do
+    send Genie.Websocket, {update, val}
+  end
 end
