@@ -4,7 +4,7 @@
 ##  The cookie needs to be configured prior to vm boot for
 ##  for read only filesystem.
 
-# -name genie@0.0.0.0
+-name genie@lamp.local
 -setcookie 7critj72iczxpjier2nbnbmbh7bsd62uqrihzigl5hwwjnt5eluuy3tlgkowow5f
 
 ## Use Ctrl-C to interrupt the current shell rather than invoking the emulator's

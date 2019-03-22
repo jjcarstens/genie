@@ -17,9 +17,9 @@ defmodule Genie.Application do
   end
 
   # List all child processes to be supervised
-  def target_children(:host), do: []
+  defp target_children(:host), do: []
 
-  def target_children(_target) do
+  defp target_children(_target) do
     [
       {Genie.MotionSensor, []},
       {Genie.StorageRelay, []}

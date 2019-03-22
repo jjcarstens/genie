@@ -35,6 +35,7 @@ defmodule Genie.MixProject do
   defp deps do
     [
       # Dependencies for all targets
+      {:api, path: "api"},
       {:circuits_uart, "~> 1.3"},
       {:jason, "~> 1.1"},
       {:nerves, "~> 1.4", runtime: false},

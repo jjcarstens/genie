@@ -2,7 +2,7 @@ defmodule Genie.MotionSensor do
   use GenServer
   require Logger
 
-  defguard is_powering_up(current, past) when is_nil(past) or ((current - past)/1.0e9) < 5
+  defguard is_false_trigger(current, past) when is_nil(past) or ((current - past)/1.0e9) < 3
 
   defstruct pin: nil, last_timestamp: nil, options: nil
 
@@ -15,6 +15,13 @@ defmodule Genie.MotionSensor do
   def init(state) do
     send self(), :init
     {:ok, state}
+  end
+
+  def read, do: GenServer.call(__MODULE__, :read)
+
+  @impl true
+  def handle_call(:read, _from, %{pin: pin} = state) do
+    {:reply, Circuits.GPIO.read(pin), state}
   end
 
   @impl true

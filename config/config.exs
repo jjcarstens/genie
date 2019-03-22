@@ -50,4 +50,17 @@ config :nerves_network, :default,
 config :genie, :websocket_url, System.get_env("WEBSOCKET_URL") || "ws://localhost:4000/nerves/websocket"
 config :genie, :websocket_token, System.get_env("WEBSOCKET_TOKEN") || "some_token"
 
+config :api, ApiWeb.Endpoint,
+  url: [host: "localhost"],
+  http: [port: 4080],
+  secret_key_base: "Kkg0a4kTsKMUM+FgQu5wehO/PC+iXvRPltznzkktV0zSwU4PRdBHK0jx3K80OPkR",
+  server: true,
+  root: Path.dirname(__DIR__),
+  render_errors: [view: ApiWeb.ErrorView, accepts: ~w(json)],
+  pubsub: [name: Nerves.PubSub, adapter: Phoenix.PubSub.PG2],
+  code_reloader: false
+
+# Use Jason for JSON parsing in Phoenix
+config :phoenix, :json_library, Jason
+
 # import_config "#{Mix.target()}.exs"
