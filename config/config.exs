@@ -11,7 +11,7 @@ config :logger, backends: [RingLogger]
 ##
 # SSH access
 #
-keys = [Path.join([System.user_home!(), ".ssh", "mx.pub"])]
+keys = [Path.join([System.user_home!(), ".ssh", "id_rsa.pub"])]
   |> Enum.filter(&File.exists?/1)
 
 config :nerves_firmware_ssh,
